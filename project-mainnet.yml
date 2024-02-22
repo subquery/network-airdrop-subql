@@ -1,0 +1,49 @@
+specVersion: 1.0.0
+name: subquery-airdrop
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node-ethereum'
+    version: '*'
+    options:
+      unfinalizedBlocks: true
+  query:
+    name: '@subql/query'
+    version: '*'
+description: 'Airdrop Contract for SubQuery Mainnet'
+repository: ''
+schema:
+  file: ./schema.graphql
+
+network:
+  chainId: '1' # ethereum
+  endpoint: https://eth.llamarpc.com
+  dictionary: ''
+
+x-ethereum: &ethereum
+  kind: ethereum/Runtime
+  startBlock: 
+    19282297
+
+  assets:
+    airdrop:
+      file: ./node_modules/@subql/contract-sdk/artifacts/contracts/root/AirdropperLite.sol/AirdropperLite.json
+
+dataSources:
+  - <<: *ethereum
+    options:
+      abi: airdrop
+      address: '0x82DF281C2cd9da593118f00A86d9998C91F1D1DC'
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleRoundCreated
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - RoundCreated(uint256 indexed roundId, address tokenAddress, uint256 roundStartTime, uint256 roundDeadline)
+        - handler: handleAddAirdrop
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - AddAirdrop(address indexed addr, uint256 roundId, uint256 amount)
