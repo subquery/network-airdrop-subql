@@ -47,3 +47,13 @@ dataSources:
           filter:
             topics:
               - AddAirdrop(address indexed addr, uint256 roundId, uint256 amount)
+        - handler: handleAirdropClaimed
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - AirdropClaimed(address indexed addr, uint256 roundId, uint256 amount)
+        - handler: handleRoundSettled
+          kind: ethereum/LogHandler
+          filter:
+            topics:
+              - RoundSettled(uint256 indexed roundId, address settleDestination, uint256 unclaimAmount)

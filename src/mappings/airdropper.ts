@@ -10,7 +10,7 @@ import {
   import { EthereumLog } from '@subql/types-ethereum';
   import assert from 'assert';
   import { Airdrop, AirdropClaimStatus, AirdropUser } from '../types';
-  import { reportException, upsertAirdropper } from './utils';
+  import { upsertAirdropper } from './utils';
   
   const getAirdropUserId = (roundId: string, address: string) =>
     `${roundId}:${address}`;
@@ -52,7 +52,6 @@ import {
       airdrop.updateAt = `${HANDLER}:${event.blockNumber}`;
     } else {
       const error = `Expect roundId - ${roundIdString} exit`;
-      await reportException(HANDLER, error, event);
       logger.error(error);
     }
   }
@@ -85,7 +84,6 @@ import {
       await airdropUser.save();
     } else {
       const error = `Expect roundId - ${roundIdString} exit`;
-      await reportException(HANDLER, error, event);
       logger.error(error);
     }
   }
@@ -105,14 +103,12 @@ import {
   
     if (!airdrop) {
       const error = `Expect roundId - ${roundIdString} exit`;
-      await reportException(HANDLER, error, event);
       logger.error(error);
       return;
     }
   
     if (!airdropUser) {
       const error = `Expect airdropUser - ${airdropUserId} exit`;
-      await reportException(HANDLER, error, event);
       logger.error(error);
       return;
     }

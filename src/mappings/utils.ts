@@ -4,57 +4,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { EthereumLog } from '@subql/types-ethereum';
 import bs58 from 'bs58';
-
-import assert from 'assert';
-import { AirdropAmount, Exception, JSONBigInt } from '../types';
+import { AirdropAmount } from '../types';
 import { BigNumberish } from 'ethers';
-
-export enum Contracts {
-  ERA_MANAGER_ADDRESS = 'EraManager',
-  STAKING_ADDRESS = 'Staking',
-  INDEXER_REGISTRY_ADDRESS = 'IndexerRegistry',
-  PLAN_MANAGER_ADDRESS = 'PlanManager',
-  SA_REGISTRY_ADDRESS = 'ServiceAgreementRegistry',
-  REWARD_DIST_ADDRESS = 'RewardsDistributor',
-  SQT_ADDRESS = 'L2SQToken',
-}
-
-declare global {
-  interface BigIntConstructor {
-    fromJSONType(value: unknown): bigint;
-  }
-  interface BigInt {
-    toJSON(): string;
-    toJSONType(): JSONBigInt;
-    fromJSONType(value: unknown): bigint;
-  }
-}
-
-BigInt.prototype.toJSON = function (): string {
-  return BigNumber.from(this).toHexString();
-};
-
-BigInt.prototype.toJSONType = function () {
-  return {
-    type: 'bigint',
-    value: this.toJSON(),
-  };
-};
-
-BigInt.fromJSONType = function (value: JSONBigInt): bigint {
-  if (value?.type !== 'bigint' && !value.value) {
-    throw new Error('Value is not JSONBigInt');
-  }
-
-  return BigNumber.from(value.value).toBigInt();
-};
-
-export function bigNumbertoJSONType(value: BigNumber): JSONBigInt {
-  return {
-    type: 'bigint',
-    value: value.toHexString(),
-  };
-}
 
 export function bytesToIpfsCid(raw: string): string {
   // Add our default ipfs values for first 2 bytes:
@@ -101,38 +52,6 @@ export function bigNumberFrom(value: unknown): BigNumber {
   } catch (e) {
     return BigNumber.from(0);
   }
-}
-
-export async function reportIndexerNonExistException(
-  handler: string,
-  indexerAddress: string,
-  event: EthereumLog<any>
-): Promise<void> {
-  logger.error(`${handler}: Expected indexer to exist: ${indexerAddress}`);
-
-  return reportException(
-    handler,
-    `Expected indexer to exist: ${indexerAddress}`,
-    event
-  );
-}
-
-export async function reportException(
-  handler: string,
-  error: string,
-  event: EthereumLog<any>
-): Promise<void> {
-  const id = `${event.blockNumber}:${event.transactionHash}`;
-
-  const exception = Exception.create({
-    id,
-    error: error || `Error: ${id}`,
-    handler,
-  });
-
-  await exception.save();
-
-  assert(false, `${id}: Error at ${handler}: ${error});`);
 }
 
 export const toBigNumber = (amount: BigNumberish): BigNumber =>
